@@ -5,8 +5,8 @@ import java.util.Scanner;
 public class Bank {
     public static void main(String[] args) {
         int choice;
-        InvalidAmountException invalidamount = new InvalidAmountException("invalid amount , less than 0");
-        InsufficientFundsException nofund = new InsufficientFundsException("insufficient balance");
+        InvalidAmountException invalidAmount = new InvalidAmountException("Invalid amount, less than 0");
+        InsufficientFundsException insufficientFunds = new InsufficientFundsException("Insufficient balance");
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter the number of customers");
         int noOfCustomers = sc.nextInt();
@@ -26,8 +26,8 @@ public class Bank {
 
             switch (choice) {
                 case 1: {
-                    for (int i = 0; i < noOfCustomers; i++) {
-                        customers[i].printDetails();
+                    for (Customer customer : customers) {
+                        customer.printDetails();
                     }
                     break;
                 }
@@ -36,15 +36,15 @@ public class Bank {
                     int search = sc.nextInt();
                     boolean accountFound = false;
 
-                    for (int i = 0; i < noOfCustomers; i++) {
-                        if (customers[i].accountNumber == search) {
-                            customers[i].printDetails();
+                    for (Customer customer : customers) {
+                        if (customer.accountNumber == search) {
+                            customer.printDetails();
                             accountFound = true;
                             break;
                         }
                     }
 
-                    if (accountFound==false) {
+                    if (!accountFound) {
                         System.out.println("Account not found");
                     }
                     break;
@@ -52,57 +52,72 @@ public class Bank {
                 case 3: {
                     System.out.println("Enter the account number");
                     int query = sc.nextInt();
-                    for (int i = 0; i < noOfCustomers; i++) {
-                        if (customers[i].accountNumber == query) {
+                    boolean accountFound = false;
+
+                    for (Customer customer : customers) {
+                        if (customer.accountNumber == query) {
+                            accountFound = true;
                             try {
                                 System.out.println("Enter the amount to deposit");
                                 int deposit = sc.nextInt();
                                 if (deposit < 0) {
-                                    throw invalidamount;
+                                    throw invalidAmount;
                                 }
-                                customers[i].balance += deposit;
+                                customer.balance += deposit;
+                                System.out.println("Deposit successful. New balance: " + customer.balance);
                             } catch (InvalidAmountException e) {
                                 System.out.println(e.getMessage());
                             }
-                        } 
-                        else {
-                            System.out.println("Account not found");
                             break;
                         }
+                    }
+
+                    if (!accountFound) {
+                        System.out.println("Account not found");
                     }
                     break;
                 }
                 case 4: {
                     System.out.println("Enter the account number");
                     int query = sc.nextInt();
-                    for (int i = 0; i < noOfCustomers; i++) {
-                        if (customers[i].accountNumber == query) {
+                    boolean accountFound = false;
+
+                    for (Customer customer : customers) {
+                        if (customer.accountNumber == query) {
+                            accountFound = true;
                             try {
                                 System.out.println("Enter the amount to withdraw");
                                 int withdraw = sc.nextInt();
                                 if (withdraw < 0) {
-                                    throw invalidamount;
-                                } else if (withdraw > customers[i].balance) {
-                                    throw nofund;
+                                    throw invalidAmount;
+                                } else if (withdraw > customer.balance) {
+                                    throw insufficientFunds;
                                 } else {
-                                    customers[i].balance -= withdraw;
+                                    customer.balance -= withdraw;
+                                    System.out.println("Withdrawal successful. New balance: " + customer.balance);
                                 }
                             } catch (InvalidAmountException e) {
                                 System.out.println(e.getMessage());
                             } catch (InsufficientFundsException e) {
                                 System.out.println(e.getMessage());
                             }
-                        } else {
-                            System.out.println("Account not found");
                             break;
                         }
                     }
+
+                    if (!accountFound) {
+                        System.out.println("Account not found");
+                    }
                     break;
                 }
-                default:
+                case 5:
                     break;
+                default:
+                    System.out.println("Enter the correct choice");
             }
         } while (choice != 5);
+
+        sc.close(); // Close the scanner to prevent resource leak
     }
 }
 
@@ -132,7 +147,6 @@ class Customer {
         System.out.println("Balance : " + balance);
         System.out.println("________________________________");
     }
-
 }
 
 class InvalidAmountException extends Exception {
